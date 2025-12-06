@@ -45,15 +45,15 @@ const mapSchool = (school: any): School => ({
 });
 
 const mapProduct = (product: any): Product => ({
-    id: product.id_produto?.toString() ?? '',
+    id: product.id_produto?.toString() ?? product.id?.toString() ?? '',
     canteenId: product.id_cantina?.toString() ?? '',
     name: product.nome ?? 'Produto sem nome',
     price: parseFloat(product.preco ?? 0),
     ativo: Boolean(product.ativo),
     category: product.categoria ?? 'Salgado',
     image: {
-      id: product.id_produto?.toString(),
-      imageUrl: product.url_imagem || 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb29kfGVufDB8fHx8MTc2MTE2Njc4Nnww&ixlib=rb-4.1.0&q=80&w=1080',
+      id: product.id_produto?.toString() ?? product.id?.toString(),
+      imageUrl: product.url_imagem || product.image?.imageUrl || 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb29kfGVufDB8fHx8MTc2MTE2Njc4Nnww&ixlib=rb-4.1.0&q=80&w=1080',
       imageHint: 'product image',
       description: product.nome
     },
@@ -77,19 +77,19 @@ const mapFavorite = (favorite: any): Favorite => ({
 });
 
 const mapOrder = (order: any): Order => ({
-    id: order.id_pedido?.toString() ?? '',
+    id: order.id_pedido?.toString() ?? order.id?.toString() ?? '',
     studentId: order.id_destinatario?.toString() ?? '',
     userId: order.id_comprador?.toString() ?? '',
     canteenId: order.id_cantina?.toString() ?? '',
     total: parseFloat(order.valor_total ?? 0),
     date: order.created_at,
     items: (order.itens_pedido || order.items || []).map((p: any): OrderItem => ({
-        productId: p.id_produto?.toString() ?? '',
+        productId: p.id_produto?.toString() ?? p.productId ?? '',
         productName: p.produto?.nome ?? 'Produto desconhecido',
         quantity: p.quantidade,
-        unitPrice: parseFloat(p.preco_unitario ?? 0),
+        unitPrice: parseFloat(p.preco_unitario ?? p.unitPrice ?? 0),
         image: {
-            id: p.id_produto?.toString(),
+            id: p.id_produto?.toString() ?? p.productId,
             imageUrl: p.produto?.url_imagem || 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb29kfGVufDB8fHx8MTc2MTE2Njc4Nnww&ixlib=rb-4.1.0&q=80&w=1080',
             imageHint: 'order item',
             description: p.produto?.nome,
@@ -210,10 +210,9 @@ export const postOrder = async (orderData: {
   status: string;
   items: { productId: string; quantity: number; unitPrice: number; }[];
 }): Promise<Order> => {
-  // A API espera o payload de itens com as chaves em camelCase, conforme o erro 422 indica.
-  // Não é necessária nenhuma conversão para snake_case aqui.
+  // O backend espera `camelCase` para os itens, conforme a validação.
   const payload = {
-    ...orderData
+    ...orderData,
   };
   const response = await apiPost<any>('pedidos', payload);
   return mapOrder(response);

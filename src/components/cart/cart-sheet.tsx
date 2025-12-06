@@ -69,7 +69,7 @@ export const CartSheet = () => {
 
     setIsCheckingOut(true);
     try {
-      // CORREÇÃO: Garante que o payload enviado para a API usa `productId` e `unitPrice`
+      // O backend espera camelCase para os itens, conforme a validação.
       const orderPayload = {
         id_comprador: user.id,
         id_destinatario: user.id,
@@ -77,9 +77,9 @@ export const CartSheet = () => {
         valor_total: totalPrice,
         status: 'pendente',
         items: cartItems.map(item => ({
-          productId: item.product.id, // <<<< Correção aqui
+          productId: item.product.id,
           quantity: item.quantity,
-          unitPrice: item.product.price, // <<<< Correção aqui
+          unitPrice: item.product.price,
         })),
       };
 
