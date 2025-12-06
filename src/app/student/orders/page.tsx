@@ -153,7 +153,7 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Voltar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onCancelOrder(order.id!)}>Confirmar</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => onCancelOrder(order.id ?? '')}>Confirmar</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
