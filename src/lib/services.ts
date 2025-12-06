@@ -162,15 +162,16 @@ export const getProductsByCanteen = async (canteenId: string): Promise<Product[]
     }
   };
 
-export const getFavoritesByUser = async (): Promise<Favorite[]> => {
+  export const getFavoritesByUser = async (userId: string): Promise<Favorite[]> => {
+    if (!userId) return [];
     try {
-      const response = await apiGet<any[]>(`favoritos/usuario`);
-      return response.map(mapFavorite);
+        const response = await apiGet<any[]>(`favoritos/usuario/${userId}`);
+        return response.map(mapFavorite);
     } catch (e) {
-      console.error(`Failed to fetch favorites for user:`, e);
-      return [];
+        console.error(`Failed to fetch favorites for user ${userId}:`, e);
+        return [];
     }
-  };
+};
 
 export const addFavorite = async (userId: string, productId: string): Promise<Favorite | null> => {
   try {
@@ -192,12 +193,13 @@ export const removeFavorite = async (userId: string, productId: string): Promise
   }
 };
 
-export const getOrdersByUser = async (): Promise<Order[]> => {
+export const getOrdersByUser = async (userId: string): Promise<Order[]> => {
+    if (!userId) return [];
     try {
-        const response = await apiGet<any[]>(`pedidos/usuario`);
+        const response = await apiGet<any[]>(`pedidos/usuario/${userId}`); 
         return response.map(mapOrder);
     } catch (e) {
-        console.error(`Failed to fetch orders for user:`, e);
+        console.error(`Failed to fetch orders for user ${userId}:`, e);
         return [];
     }
 };
@@ -262,22 +264,23 @@ export const getStudentProfile = async (studentId: string): Promise<StudentProfi
 export const getWalletByUserId = async (userId: string): Promise<Wallet | null> => {
     if (!userId) return null;
     try {
-      const response = await apiGet<any>(`carteiras/usuario/${userId}`);
-      return mapWallet(response);
+        const response = await apiGet<any>(`carteiras/usuario/${userId}`);
+        return mapWallet(response);
     } catch (e) {
-      console.error(`Failed to fetch wallet for user ${userId}:`, e);
-      return null;
+        console.error(`Failed to fetch wallet for user ${userId}:`, e);
+        return null;
     }
 };
 
-export const getTransactionsByUser = async (): Promise<Transaction[]> => {
-  try {
-    const response = await apiGet<any[]>(`transacoes/usuario`);
-    return response.map(mapTransaction);
-  } catch (e) {
-    console.error(`Failed to fetch transactions for user:`, e);
-    throw new Error('Erro ao buscar transação: ' + (e as Error).message);
-  }
+export const getTransactionsByUser = async (userId: string): Promise<Transaction[]> => {
+    if (!userId) return [];
+    try {
+        const response = await apiGet<any[]>(`transacoes/usuario/${userId}`);
+        return response.map(mapTransaction);
+    } catch (e) {
+        console.error(`Failed to fetch transactions for user ${userId}:`, e);
+        throw new Error('Erro ao buscar transação: ' + (e as Error).message);
+    }
 };
 
 export const rechargeBalance = async (userId: string, amount: number): Promise<any> => {

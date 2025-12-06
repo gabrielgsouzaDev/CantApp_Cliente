@@ -1,5 +1,5 @@
 it push
-# Firebase Studio
+# frontend cliente
 
 This is a NextJS starter in Firebase Studio.
 
