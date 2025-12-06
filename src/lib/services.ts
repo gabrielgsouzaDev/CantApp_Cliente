@@ -150,15 +150,16 @@ export const getCanteensBySchool = async (schoolId: string): Promise<Canteen[]> 
 };
 
 export const getProductsByCanteen = async (canteenId: string): Promise<Product[]> => {
-  if (!canteenId) return [];
-  try {
-    const response = await apiGet<any[]>(`cantinas/${canteenId}/produtos`);
-    return response.map(mapProduct);
-  } catch (e) {
-    console.error(`Failed to fetch products for canteen ${canteenId}:`, e);
-    return [];
-  }
-};
+    if (!canteenId) return [];
+    try {
+      const response = await apiGet<any[]>(`cantinas/${canteenId}/produtos`);
+      return response.map(mapProduct);
+    } catch (e) {
+      console.error(`Failed to fetch products for canteen ${canteenId}:`, e);
+      // Retorna uma lista vazia em caso de erro para não quebrar a UI
+      return [];
+    }
+  };
 
 export const getFavoritesByUser = async (userId: string): Promise<Favorite[]> => {
   if (!userId) return [];
@@ -208,13 +209,9 @@ export const postOrder = async (orderData: {
   id_cantina: string;
   valor_total: number;
   status: string;
-  items: { productId: string; quantity: number; unitPrice: number; }[];
+  items: { product_id: string; quantity: number; unit_price: number; }[];
 }): Promise<Order> => {
-  // O backend espera `camelCase` para os itens, conforme a validação.
-  const payload = {
-    ...orderData,
-  };
-  const response = await apiPost<any>('pedidos', payload);
+  const response = await apiPost<any>('pedidos', orderData);
   return mapOrder(response);
 };
 

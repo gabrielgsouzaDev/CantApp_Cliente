@@ -107,10 +107,12 @@ export type Favorite = {
 // -------------------------
 
 export type OrderItem = {
-  productId: string;
+  productId?: string; // Mantido para compatibilidade interna
+  product_id?: string; // Para envio à API
   productName: string;
   quantity: number;
-  unitPrice: number;
+  unitPrice?: number; // Mantido para compatibilidade interna
+  unit_price?: number; // Para envio à API
   image: Image;
 };
 
