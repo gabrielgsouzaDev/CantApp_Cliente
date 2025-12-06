@@ -81,8 +81,8 @@ function PixPaymentContent() {
       // Redireciona o usuário após um breve delay para que ele veja a mensagem de sucesso.
       setTimeout(() => {
         const redirectPath = user?.role === 'Aluno' ? '/student/balance' : '/guardian/recharge';
-        router.push(redirectPath);
-        router.refresh(); 
+        // FORÇA o recarregamento da página para garantir que o useEffect de transações seja executado
+        window.location.href = redirectPath;
       }, 1500);
 
     } catch (error: any) {
