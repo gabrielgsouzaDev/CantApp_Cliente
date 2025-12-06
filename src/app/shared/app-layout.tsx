@@ -13,6 +13,17 @@ import { Menu, Home, Package, Wallet, Settings, LogOut, Users, Component } from 
 import { useAuth } from '@/lib/auth-provider';
 import { CartSheet } from '@/components/cart/cart-sheet';
 import { FavoritesSheet } from '@/components/favorites/favorites-sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const siteConfig = { name: 'CantApp' };
 
@@ -30,6 +41,29 @@ const GUARDIAN_LINKS: NavLinkType[] = [
   { href: '/guardian/recharge', label: 'Recarregar' , icon: Wallet },
   { href: '/guardian/order', label: 'Fazer Pedido', icon: Component },
 ];
+
+function LogoutConfirmation({ onConfirm, children }: { onConfirm: () => void; children: React.ReactNode }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        {children}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Sua sessão será encerrada e você precisará fazer login novamente.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Sair</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 
 function UserNav() {
   const { user, logout } = useAuth();
@@ -59,10 +93,12 @@ function UserNav() {
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
-        </DropdownMenuItem>
+        <LogoutConfirmation onConfirm={logout}>
+           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Sair</span>
+          </DropdownMenuItem>
+        </LogoutConfirmation>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -115,10 +151,12 @@ export function AppLayout({ children, userType }: AppLayoutProps) {
               Configurações
             </Button>
           </Link>
-          <Button variant='ghost' className='w-full justify-start gap-2' onClick={logout}>
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          <LogoutConfirmation onConfirm={logout}>
+            <Button variant='ghost' className='w-full justify-start gap-2'>
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </LogoutConfirmation>
         </nav>
       </div>
     </div>
