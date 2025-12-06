@@ -69,17 +69,18 @@ export const CartSheet = () => {
 
     setIsCheckingOut(true);
     try {
-      // O backend espera camelCase para os itens, conforme a validação.
+      // CORREÇÃO: O payload é montado aqui com as chaves em camelCase,
+      // exatamente como a validação do backend espera ('productId', 'unitPrice').
       const orderPayload = {
         id_comprador: user.id,
         id_destinatario: user.id,
         id_cantina: cartItems[0].product.canteenId,
         valor_total: totalPrice,
-        status: 'pendente',
+        status: 'pendente' as const, // Assegura que o status é do tipo literal correto
         items: cartItems.map(item => ({
-          productId: item.product.id,
+          productId: item.product.id, // camelCase, como exigido pelo validador do Laravel
           quantity: item.quantity,
-          unitPrice: item.product.price,
+          unitPrice: item.product.price, // camelCase
         })),
       };
 
