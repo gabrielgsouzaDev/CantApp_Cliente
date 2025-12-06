@@ -2,7 +2,8 @@ import type {Metadata} from 'next';
 import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { AuthProvider } from '@/lib/auth-provider';
-import { CartProvider } from '@/hooks/use-cart'; // ✅ 1. Importar o CartProvider
+import { CartProvider } from '@/hooks/use-cart';
+import { FavoritesProvider } from '@/hooks/use-favorites'; // Importa o FavoritesProvider
 
 export const metadata: Metadata = {
   title: 'CantApp',
@@ -24,8 +25,10 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-          <CartProvider> {/* ✅ 2. Envolver o children com o CartProvider */}
-            {children}
+          <CartProvider>
+            <FavoritesProvider> {/* Envolve com o FavoritesProvider */}
+              {children}
+            </FavoritesProvider>
           </CartProvider>
         </AuthProvider>
         <Toaster />

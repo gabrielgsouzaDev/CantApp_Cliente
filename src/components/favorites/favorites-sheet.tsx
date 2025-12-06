@@ -1,4 +1,4 @@
-// src/components/favorites/favorites-sheet.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -6,29 +6,24 @@ import { Heart, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import type { Product } from '@/lib/data';
+import { useFavorites } from '@/hooks/use-favorites';
 import { FavoriteList } from './favorite-list';
 
-interface FavoritesSheetProps {
-  favorites: Product[];
-  setFavorites: (favorites: Product[]) => void;
-  isLoaded: boolean;
-}
-
-export function FavoritesSheet({ favorites, setFavorites, isLoaded }: FavoritesSheetProps) {
+export function FavoritesSheet() {
   const [isOpen, setIsOpen] = useState(false);
+  const { favorites, favoritesCount } = useFavorites();
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon" className="relative">
           <Heart className="h-5 w-5" />
-          {isLoaded && favorites.length > 0 && (
+          {favoritesCount > 0 && (
             <Badge
               variant="destructive"
               className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
             >
-              {favorites.length}
+              {favoritesCount}
             </Badge>
           )}
           <span className="sr-only">Abrir favoritos</span>
@@ -38,13 +33,7 @@ export function FavoritesSheet({ favorites, setFavorites, isLoaded }: FavoritesS
         <SheetHeader>
           <SheetTitle>Meus Favoritos</SheetTitle>
         </SheetHeader>
-        {isLoaded ? (
-          <FavoriteList favorites={favorites} setFavorites={setFavorites} />
-        ) : (
-          <div className="flex flex-1 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        <FavoriteList favorites={favorites} />
       </SheetContent>
     </Sheet>
   );

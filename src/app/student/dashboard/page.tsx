@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-provider";
 import { useCart } from "@/hooks/use-cart";
-import { getCanteensBySchool, getFavoritesByUser, addFavorite, removeFavorite } from '@/lib/services';
+import { useFavorites } from "@/hooks/use-favorites"; // Importa o novo hook
+import { getCanteensBySchool } from '@/lib/services';
 import { type Product, type Canteen } from '@/lib/data';
 
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ export default function StudentDashboardPage() {
   const { toast } = useToast();
   const { user, isLoading: isUserLoading } = useAuth();
   const { addItem, cartItems } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites(); // Usa o hook de favoritos
 
   const [canteens, setCanteens] = useState<Canteen[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,26 +39,17 @@ export default function StudentDashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category>('Todos');
   const [addToCartState, setAddToCartState] = useState<AddToCartState>({});
 
-  const [favoriteProductIds, setFavoriteProductIds] = useState<Set<string>>(new Set());
-
   const fetchInitialData = useCallback(async () => {
-    if (user?.schoolId && user.id) {
+    if (user?.schoolId) {
       setIsLoading(true);
       try {
-        const [canteenList, userFavorites] = await Promise.all([
-          getCanteensBySchool(user.schoolId),
-          getFavoritesByUser(user.id)
-        ]);
-
+        const canteenList = await getCanteensBySchool(user.schoolId);
         setCanteens(canteenList);
         if (canteenList.length > 0) {
           const defaultCanteen = canteenList[0];
           setSelectedCanteenId(defaultCanteen.id);
           setProducts(defaultCanteen.produtos || []); 
         }
-        
-        setFavoriteProductIds(new Set(userFavorites.map(fav => fav.productId)));
-
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
         toast({ variant: 'destructive', title: 'Erro ao carregar dados', description: 'Não foi possível buscar as informações da página.' });
@@ -81,39 +74,15 @@ export default function StudentDashboardPage() {
     }
   };
 
-  const handleToggleFavorite = useCallback(async (productId: string) => {
-    if (!user?.id) return;
-
-    const originalFavorites = new Set(favoriteProductIds);
-    const isCurrentlyFavorite = originalFavorites.has(productId);
-
-    // Atualização Otimista: muda a UI imediatamente
-    setFavoriteProductIds(prev => {
-      const newFavorites = new Set(prev);
-      if (isCurrentlyFavorite) {
-        newFavorites.delete(productId);
-      } else {
-        newFavorites.add(productId);
-      }
-      return newFavorites;
+  // A lógica de favoritar agora é gerenciada pelo hook
+  const handleToggleFavorite = (product: Product) => {
+    const currentlyFavorite = isFavorite(product.id);
+    toggleFavorite(product);
+    toast({
+        title: currentlyFavorite ? "Removido dos favoritos" : "Adicionado aos favoritos!",
+        variant: currentlyFavorite ? "default" : "success"
     });
-
-    try {
-      if (isCurrentlyFavorite) {
-        await removeFavorite(user.id, productId);
-        toast({ title: "Removido dos favoritos" });
-      } else {
-        await addFavorite(user.id, productId);
-        toast({ title: "Adicionado aos favoritos!", variant: "success" });
-      }
-    } catch (error) {
-      console.error("Failed to update favorites", error);
-      toast({ variant: 'destructive', title: 'Erro de Rede', description: 'Não foi possível atualizar. Revertendo ação.' });
-      // Reverte a UI em caso de erro
-      setFavoriteProductIds(originalFavorites);
-    }
-  }, [user?.id, favoriteProductIds, toast]);
-
+  };
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -210,17 +179,17 @@ export default function StudentDashboardPage() {
         {filteredProducts.map((product) => {
           const quantityInCart = getCartItemQuantity(product.id);
           const isAdded = addToCartState[product.id] === 'added';
-          const isFavorite = favoriteProductIds.has(product.id);
+          const favorite = isFavorite(product.id);
           
           return (
           <Card key={product.id} className="relative flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
             <CardHeader className="p-0 relative">
                 <button 
-                    onClick={() => handleToggleFavorite(product.id)}
+                    onClick={() => handleToggleFavorite(product)}
                     className="absolute top-2 right-2 z-10 p-1.5 bg-background/60 rounded-full backdrop-blur-sm transition-all duration-200 ease-in-out hover:bg-background/80 active:scale-125"
-                    aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                    aria-label={favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                 >
-                    <Heart className={`h-5 w-5 transition-colors ${isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-400'}`} />
+                    <Heart className={`h-5 w-5 transition-colors ${favorite ? 'text-red-500 fill-red-500' : 'text-gray-400'}`} />
                 </button>
               <Image
                 src={product.image?.imageUrl || defaultImage}

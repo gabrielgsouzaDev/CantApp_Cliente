@@ -13,8 +13,6 @@ import { Menu, Home, Package, Wallet, Settings, LogOut, Users, Component } from 
 import { useAuth } from '@/lib/auth-provider';
 import { CartSheet } from '@/components/cart/cart-sheet';
 import { FavoritesSheet } from '@/components/favorites/favorites-sheet';
-import { getFavoritesByUser } from '@/lib/services';
-import type { Product } from '@/lib/data';
 
 const siteConfig = { name: 'CantApp' };
 
@@ -29,8 +27,8 @@ const STUDENT_LINKS: NavLinkType[] = [
 
 const GUARDIAN_LINKS: NavLinkType[] = [
   { href: '/guardian/dashboard', label: 'Início', icon: Home },
-  { href: '/guardian/students', label: 'Alunos', icon: Users },
-  { href: '/guardian/canteen', label: 'Cantina', icon: Component },
+  { href: '/guardian/dependents', label: 'Dependentes', icon: Users },
+  { href: '/guardian/order', label: 'Fazer Pedido', icon: Component },
 ];
 
 function UserNav() {
@@ -54,7 +52,7 @@ function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href="/student/settings">
+        <Link href={user?.role === 'Aluno' ? "/student/settings" : "/guardian/settings"}>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             <span>Configurações</span>
@@ -76,38 +74,8 @@ export function AppLayout({ children, userType }: AppLayoutProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const links = userType === 'student' ? STUDENT_LINKS : GUARDIAN_LINKS;
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
 
-  const [favorites, setFavorites] = useState<Product[]>([]);
-  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    const loadFavorites = async () => {
-      setFavoritesLoaded(false);
-      if (user?.id && userType === 'student') {
-        try {
-          const favs = await getFavoritesByUser(user.id);
-          if (!mounted) return;
-          const products = favs.map(f => f.product).filter(Boolean) as Product[];
-          setFavorites(products);
-        } catch (e) {
-          console.error('Failed to load favorites:', e);
-          if (mounted) setFavorites([]);
-        } finally {
-          if (mounted) setFavoritesLoaded(true);
-        }
-      } else {
-        // usuário não logado ou não estudante
-        if (mounted) {
-          setFavorites([]);
-          setFavoritesLoaded(true);
-        }
-      }
-    };
-    loadFavorites();
-    return () => { mounted = false; };
-  }, [user?.id, userType]);
 
   const NavLink = ({ href, children }: { href: string; children: ReactNode }) => (
     <Link
@@ -141,7 +109,7 @@ export function AppLayout({ children, userType }: AppLayoutProps) {
       </div>
       <div className="mt-auto p-4">
         <nav className='grid gap-1'>
-          <Link href='/student/settings'>
+          <Link href={userType === 'student' ? '/student/settings' : '/guardian/settings'}>
             <Button variant={pathname.includes('/settings') ? 'secondary' : 'ghost'} className='w-full justify-start gap-2'>
               <Settings className="h-4 w-4" />
               Configurações
@@ -181,11 +149,7 @@ export function AppLayout({ children, userType }: AppLayoutProps) {
           <div className="flex items-center gap-2">
             {userType === 'student' && (
               <>
-                <FavoritesSheet
-                  favorites={favorites}
-                  setFavorites={setFavorites}
-                  isLoaded={favoritesLoaded}
-                />
+                <FavoritesSheet />
                 <CartSheet />
               </>
             )}
