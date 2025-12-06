@@ -73,23 +73,22 @@ function PixPaymentContent() {
       setPaymentStatus('confirmed');
       toast({ variant: 'success', title: 'Pagamento Processado!', description: 'Seu saldo foi atualizado com sucesso.' });
 
-      // Aguarda um pouco e atualiza os dados do usuário no frontend
+      // Atualiza os dados do usuário no frontend em segundo plano
       if (refreshUser) {
-        await delay(1000); // Dá um tempo para o backend processar
-        await refreshUser();
+        refreshUser();
       }
 
-      // Redireciona o usuário após a confirmação
+      // Redireciona o usuário após um breve delay para que ele veja a mensagem de sucesso.
       setTimeout(() => {
         const redirectPath = user?.role === 'Aluno' ? '/student/balance' : '/guardian/recharge';
         router.push(redirectPath);
         router.refresh(); 
-      }, 2000);
+      }, 1500);
 
     } catch (error: any) {
-      // Este bloco agora só pegaria erros do `refreshUser` ou `delay`
+      // Este bloco agora só pegaria erros inesperados no lado do cliente
       console.error("Payment confirmation error:", error);
-      toast({ variant: 'destructive', title: 'Erro na Confirmação', description: error.data?.message || 'Não foi possível atualizar o saldo.' });
+      toast({ variant: 'destructive', title: 'Erro na Confirmação', description: error.data?.message || 'Não foi possível concluir a operação.' });
       setPaymentStatus('pending');
     }
   };
