@@ -72,11 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // roda só uma vez
 
-  const handleAuthSuccess = (rawUser: any, token: string) => {
-    const mappedUser = mapUser(rawUser);
-    localStorage.setItem('authToken', token);
+  const handleAuthSuccess = (response: any) => {
+    const apiUser = response.user;
+    const apiToken = response.token;
+    
+    const mappedUser = mapUser(apiUser);
+    localStorage.setItem('authToken', apiToken);
     localStorage.setItem('userId', mappedUser.id.toString());
-    setToken(token);
+    setToken(apiToken);
     setUser(mappedUser);
   };
   
@@ -96,17 +99,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   const login = async (email: string, password: string) => {
-    const response = await apiPost<{ user: any; token: string }>('login', {
+    const response = await apiPost<any>('login', {
       email,
-      senha: password,
+      password: password, // CRÍTICO: Alterado de 'senha' para 'password'
       device_name: 'browser',
     });
-    handleAuthSuccess(response.user, response.token);
+    handleAuthSuccess(response);
   };
 
   const register = async (data: Record<string, any>) => {
     const { password, ...rest } = data;
-    const payload = { ...rest, senha: password };
+    const payload = { ...rest, password: password }; // CRÍTICO: Alterado de 'senha' para 'password'
     await apiPost('users', payload);
     await login(data.email, password);
   };
