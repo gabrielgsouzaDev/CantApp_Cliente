@@ -181,10 +181,10 @@ export default function StudentOrdersPage() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            if (user) {
+            if (user?.id) {
                 setIsLoading(true);
                 try {
-                    const orders = await getOrdersByUser();
+                    const orders = await getOrdersByUser(user.id);
                     setOrderHistory(orders);
                 } catch (error) {
                     console.error("Failed to fetch orders", error);
