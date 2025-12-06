@@ -242,11 +242,11 @@ const handleCheckout = async () => {
       id_destinatario: student.id,
       id_cantina: selectedCanteen,
       valor_total: cartTotal,
-      status: 'pendente',
+      status: 'pendente' as const,
       items: cart.map((item) => ({
-        productId: item.product.id,
+        product_id: item.product.id,
         quantity: item.quantity,
-        unitPrice: item.product.price
+        unit_price: item.product.price
       })),
     };
 
