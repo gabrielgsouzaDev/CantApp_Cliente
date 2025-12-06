@@ -1,17 +1,28 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Heart, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { useFavorites } from '@/hooks/use-favorites';
 import { FavoriteList } from './favorite-list';
+import { Input } from '@/components/ui/input';
 
 export function FavoritesSheet() {
   const [isOpen, setIsOpen] = useState(false);
   const { favorites, favoritesCount } = useFavorites();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredFavorites = useMemo(() => {
+    if (!searchTerm) {
+      return favorites;
+    }
+    return favorites.filter(fav => 
+      fav.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [favorites, searchTerm]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -30,10 +41,19 @@ export function FavoritesSheet() {
         </Button>
       </SheetTrigger>
       <SheetContent className="flex flex-col">
-        <SheetHeader>
+        <SheetHeader className="pb-4">
           <SheetTitle>Meus Favoritos</SheetTitle>
+           <div className="relative pt-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+                placeholder="Buscar nos favoritos..."
+                className="pl-10 bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </SheetHeader>
-        <FavoriteList favorites={favorites} />
+        <FavoriteList favorites={filteredFavorites} />
       </SheetContent>
     </Sheet>
   );

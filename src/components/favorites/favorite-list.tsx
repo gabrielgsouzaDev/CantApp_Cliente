@@ -4,8 +4,10 @@
 import type { Product } from '@/lib/data';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Trash2, Heart } from 'lucide-react';
+import { Trash2, Heart, ShoppingCart } from 'lucide-react';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 
 interface FavoriteListProps {
   favorites: Product[];
@@ -13,6 +15,17 @@ interface FavoriteListProps {
 
 export function FavoriteList({ favorites }: FavoriteListProps) {
   const { removeFavorite } = useFavorites();
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (product: Product) => {
+    addItem(product, 1);
+    toast({
+      title: `${product.name} adicionado!`,
+      description: "O item está no seu carrinho.",
+      variant: "success"
+    });
+  }
 
   if (!favorites || favorites.length === 0) {
     return (
@@ -39,9 +52,14 @@ export function FavoriteList({ favorites }: FavoriteListProps) {
               <div className="text-xs text-primary font-semibold">R$ {p.price.toFixed(2)}</div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => removeFavorite(p.id)}>
-              <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" onClick={() => handleAddToCart(p)}>
+              <ShoppingCart className="h-5 w-5 text-primary" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => removeFavorite(p.id)}>
+                <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          </div>
         </div>
       ))}
     </div>
