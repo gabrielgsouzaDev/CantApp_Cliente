@@ -49,7 +49,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { type Order, type Product } from '@/lib/data';
+import { type Order, type Product, type OrderItem } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -101,7 +101,7 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
     <div className="space-y-4 py-4">
         <div className="space-y-2">
          <h4 className="text-sm font-medium">Itens do Pedido</h4>
-        {order.items.map((item, index) => (
+        {order.items.map((item: OrderItem, index: number) => (
           <div key={index} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                <Image 
@@ -114,12 +114,12 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
               <div>
                 <p className="font-medium">{item.productName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {item.quantity} x R$ {item.unitPrice.toFixed(2)}
+                  {item.quantity} x R$ {(item.unitPrice ?? 0).toFixed(2)}
                 </p>
               </div>
             </div>
             <p className="font-medium">
-              R$ {(item.quantity * item.unitPrice).toFixed(2)}
+              R$ {(item.quantity * (item.unitPrice ?? 0)).toFixed(2)}
             </p>
           </div>
         ))}
@@ -227,6 +227,14 @@ export default function StudentOrdersPage() {
 
     const handleRepeatOrder = async (order: Order) => {
         try {
+            if (!order.canteenId) {
+                toast({
+                    title: "Erro ao repetir pedido",
+                    description: "A cantina original deste pedido não foi encontrada.",
+                    variant: "destructive"
+                });
+                return;
+            }
             const currentProducts = await getProductsByCanteen(order.canteenId);
             const productsMap = new Map(currentProducts.map(p => [p.id, p]));
 
