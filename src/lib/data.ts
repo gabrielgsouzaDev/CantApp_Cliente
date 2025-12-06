@@ -25,7 +25,7 @@ export type User = {
   name: string;
   email: string;
   role: 'Aluno' | 'Responsavel' | 'Admin' | 'Cantina' | 'Escola';
-  balance: number;
+  balance: number; // R6: Alerta de number/float
   schoolId: string | null;
   canteenId: string | null;
   students: User[];
@@ -54,8 +54,6 @@ export type GuardianProfile = {
   name: string;
   walletId: string | null;
   balance: number;
-
-  // O BACKEND RETORNA SÓ ISSO PARA STUDENTS
   students: StudentLite[];
 };
 
@@ -106,25 +104,33 @@ export type Favorite = {
 // ORDERS
 // -------------------------
 
+// CRÍTICO R13: A interface DEVE espelhar o que o Backend espera para ENVIO e RECEBIMENTO.
+// Tipos de ENVIO (Payload)
+export type OrderItemPayload = {
+  product_id: string; // CRÍTICO: Removido '?' e camelCase. Obrigatório no ENVIO.
+  quantity: number;
+  unit_price: number; // CRÍTICO: Removido '?' e camelCase. Obrigatório no ENVIO.
+};
+
+// Tipos de RECEBIMENTO (API Response)
 export type OrderItem = {
-  productId?: string; // Mantido para compatibilidade interna
-  product_id?: string; // Para envio à API
+  product_id: string;
   productName: string;
   quantity: number;
-  unitPrice?: number; // Mantido para compatibilidade interna
-  unit_price?: number; // Para envio à API
+  unit_price: number;
   image: Image;
 };
 
+
 export type Order = {
   id: string;
-  studentId: string;
-  userId: string;
+  id_comprador: string; 
+  id_destinatario: string; 
   canteenId: string;
   items: OrderItem[];
   total: number;
-  date: string;
-  status: 'pendente' | 'confirmado' | 'entregue' | 'cancelado';
+  date: string; // Data de criação
+  status: 'pendente' | 'confirmado' | 'entregue' | 'cancelado' | 'em_preparo' | 'pronto';
 };
 
 // -------------------------
@@ -156,7 +162,7 @@ export type Transaction = {
 export type StudentLite = {
   id: string;
   name: string;
-  balance: number;
+  balance: number; // R6: Alerta de number/float
   walletId: string | null;
   school?: {
     name: string;

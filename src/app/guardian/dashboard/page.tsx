@@ -118,12 +118,12 @@ const OrderDetailsDialog = ({
                 <div>
                   <p className="font-medium">{item.productName}</p>
                   <p className="text-sm text-muted-foreground">
-                    {item.quantity} × R$ {(item.unitPrice ?? 0).toFixed(2)}
+                    {item.quantity} × R$ {(item.unit_price ?? 0).toFixed(2)}
                   </p>
                 </div>
               </div>
               <p className="font-medium">
-                R$ {(item.quantity * (item.unitPrice ?? 0)).toFixed(2)}
+                R$ {(item.quantity * (item.unit_price ?? 0)).toFixed(2)}
               </p>
             </div>
           ))}

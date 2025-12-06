@@ -10,7 +10,8 @@ import {
     type Wallet, 
     type Favorite,
     type OrderItem,
-    type StudentLite
+    type StudentLite,
+    type OrderItemPayload
 } from '@/lib/data';
 import { apiGet, apiPost, apiDelete, apiPatch } from './api';
 
@@ -78,18 +79,18 @@ const mapFavorite = (favorite: any): Favorite => ({
 
 const mapOrder = (order: any): Order => ({
     id: order.id_pedido?.toString() ?? order.id?.toString() ?? '',
-    studentId: order.id_destinatario?.toString() ?? '',
-    userId: order.id_comprador?.toString() ?? '',
+    id_comprador: order.id_comprador?.toString() ?? '',
+    id_destinatario: order.id_destinatario?.toString() ?? '',
     canteenId: order.id_cantina?.toString() ?? '',
     total: parseFloat(order.valor_total ?? 0),
     date: order.created_at,
     items: (order.itens_pedido || order.items || []).map((p: any): OrderItem => ({
-        productId: p.id_produto?.toString() ?? p.productId ?? '',
+        product_id: p.id_produto?.toString() ?? p.product_id ?? '',
         productName: p.produto?.nome ?? 'Produto desconhecido',
         quantity: p.quantidade,
-        unitPrice: parseFloat(p.preco_unitario ?? p.unitPrice ?? 0),
+        unit_price: parseFloat(p.preco_unitario ?? p.unit_price ?? 0),
         image: {
-            id: p.id_produto?.toString() ?? p.productId,
+            id: p.id_produto?.toString() ?? p.product_id,
             imageUrl: p.produto?.url_imagem || 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmb29kfGVufDB8fHx8MTc2MTE2Njc4Nnww&ixlib=rb-4.1.0&q=80&w=1080',
             imageHint: 'order item',
             description: p.produto?.nome,
@@ -209,7 +210,7 @@ export const postOrder = async (orderData: {
   id_cantina: string;
   valor_total: number;
   status: string;
-  items: { product_id: string; quantity: number; unit_price: number; }[];
+  items: OrderItemPayload[];
 }): Promise<Order> => {
   const response = await apiPost<any>('pedidos', orderData);
   return mapOrder(response);

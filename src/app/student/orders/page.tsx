@@ -114,12 +114,12 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
                                 <div>
                                     <p className="font-medium">{item.productName}</p>
                                     <p className="text-sm text-muted-foreground">
-                                        {item.quantity} x R$ {(item.unitPrice ?? 0).toFixed(2)}
+                                        {item.quantity} x R$ {(item.unit_price ?? 0).toFixed(2)}
                                     </p>
                                 </div>
                             </div>
                             <p className="font-medium">
-                                R$ {(item.quantity * (item.unitPrice ?? 0)).toFixed(2)}
+                                R$ {(item.quantity * (item.unit_price ?? 0)).toFixed(2)}
                             </p>
                         </div>
                     ))}
@@ -153,7 +153,7 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Voltar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onCancelOrder(order.id ?? '')}>Confirmar</AlertDialogAction>
+                                    <AlertDialogAction onClick={() => onCancelOrder(order.id)}>Confirmar</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -245,7 +245,7 @@ export default function StudentOrdersPage() {
             let itemsUnavailable = 0;
 
             for (const orderItem of order.items) {
-                const product = productsMap.get(orderItem.productId);
+                const product = productsMap.get(orderItem.product_id);
                 if (product && product.ativo) {
                     addItem(product, orderItem.quantity);
                     itemsAdded++;

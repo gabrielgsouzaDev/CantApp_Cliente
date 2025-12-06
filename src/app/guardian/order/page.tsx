@@ -39,7 +39,7 @@ import { Badge } from "@/components/ui/badge";
 
 import {
   type Product, type Canteen,
-  type OrderItem, type StudentLite, type StudentProfile
+  type StudentLite, type StudentProfile
 } from "@/lib/data";
 
 import { getGuardianProfile, getStudentProfile, getCanteensBySchool, getProductsByCanteen, postOrder } from "@/lib/services";
