@@ -15,8 +15,6 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth-provider';
 import { rechargeBalance } from '@/lib/services';
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 function PixPaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,30 +61,25 @@ function PixPaymentContent() {
     toast({ title: 'Confirmando Pagamento...', description: 'Estamos atualizando o saldo. Isso pode levar um instante.' });
 
     try {
-      // Dispara a requisição de recarga, mas não espera a resposta (fire-and-forget)
-      rechargeBalance(targetId, Number(amount)).catch(error => {
-        // Loga o erro do backend no console do navegador, mas não bloqueia a UI
-        console.error("Erro ignorado na resposta da recarga:", error);
-      });
+      // AGUARDA a resposta do backend
+      await rechargeBalance(targetId, Number(amount));
 
-      // Assume que a recarga foi bem sucedida no backend e atualiza a UI imediatamente.
+      // UI é atualizada apenas após o sucesso
       setPaymentStatus('confirmed');
       toast({ variant: 'success', title: 'Pagamento Processado!', description: 'Seu saldo foi atualizado com sucesso.' });
 
-      // Atualiza os dados do usuário no frontend em segundo plano
+      // Atualiza os dados do usuário no frontend em segundo plano para refletir o novo saldo
       if (refreshUser) {
         refreshUser();
       }
 
-      // Redireciona o usuário após um breve delay para que ele veja a mensagem de sucesso.
+      // Redireciona após um breve delay para UX
       setTimeout(() => {
         const redirectPath = user?.role === 'Aluno' ? '/student/balance' : '/guardian/recharge';
-        // FORÇA o recarregamento da página para garantir que o useEffect de transações seja executado
         window.location.href = redirectPath;
       }, 1500);
 
     } catch (error: any) {
-      // Este bloco agora só pegaria erros inesperados no lado do cliente
       console.error("Payment confirmation error:", error);
       toast({ variant: 'destructive', title: 'Erro na Confirmação', description: error.data?.message || 'Não foi possível concluir a operação.' });
       setPaymentStatus('pending');

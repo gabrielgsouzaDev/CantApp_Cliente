@@ -283,13 +283,13 @@ export const getTransactionsByUser = async (userId: string): Promise<Transaction
     }
 };
 
-export const rechargeBalance = async (userId: string, amount: number): Promise<any> => {
+export const rechargeBalance = async (userId: string, amount: number): Promise<Transaction> => {
     const payload = {
         id_user: userId,
         valor: amount
     };
-    const response = await apiPost('carteiras/recarregar', payload); 
-    return response;
+    const response = await apiPost<any>('carteiras/recarregar', payload); 
+    return mapTransaction(response);
 }
 
 export const linkStudentToGuardian = async (studentCode: string): Promise<void> => {
