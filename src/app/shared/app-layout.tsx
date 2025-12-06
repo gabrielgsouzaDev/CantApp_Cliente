@@ -21,13 +21,13 @@ interface NavLinkType { href: string; label: string; icon: React.ElementType; }
 const STUDENT_LINKS: NavLinkType[] = [
   { href: '/student/dashboard', label: 'Início', icon: Home },
   { href: '/student/orders', label: 'Pedidos', icon: Package },
-  // ✅ CORRIGIDO: A rota foi ajustada de /wallet para /balance
   { href: '/student/balance', label: 'Saldo', icon: Wallet },
 ];
 
 const GUARDIAN_LINKS: NavLinkType[] = [
   { href: '/guardian/dashboard', label: 'Início', icon: Home },
   { href: '/guardian/dependents', label: 'Dependentes', icon: Users },
+  { href: '/guardian/recharge', label: 'Recarregar' , icon: Wallet },
   { href: '/guardian/order', label: 'Fazer Pedido', icon: Component },
 ];
 

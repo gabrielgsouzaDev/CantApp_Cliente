@@ -162,16 +162,15 @@ export const getProductsByCanteen = async (canteenId: string): Promise<Product[]
     }
   };
 
-export const getFavoritesByUser = async (userId: string): Promise<Favorite[]> => {
-  if (!userId) return [];
-  try {
-    const response = await apiGet<any[]>(`favoritos/usuario/${userId}`);
-    return response.map(mapFavorite);
-  } catch (e) {
-    console.error(`Failed to fetch favorites for user ${userId}:`, e);
-    return [];
-  }
-};
+export const getFavoritesByUser = async (): Promise<Favorite[]> => {
+    try {
+      const response = await apiGet<any[]>(`favoritos/usuario`);
+      return response.map(mapFavorite);
+    } catch (e) {
+      console.error(`Failed to fetch favorites for user:`, e);
+      return [];
+    }
+  };
 
 export const addFavorite = async (userId: string, productId: string): Promise<Favorite | null> => {
   try {
@@ -193,13 +192,12 @@ export const removeFavorite = async (userId: string, productId: string): Promise
   }
 };
 
-export const getOrdersByUser = async (userId: string): Promise<Order[]> => {
-    if (!userId) return [];
+export const getOrdersByUser = async (): Promise<Order[]> => {
     try {
-        const response = await apiGet<any[]>(`pedidos/usuario/${userId}`);
+        const response = await apiGet<any[]>(`pedidos/usuario`);
         return response.map(mapOrder);
     } catch (e) {
-        console.error(`Failed to fetch orders for user ${userId}:`, e);
+        console.error(`Failed to fetch orders for user:`, e);
         return [];
     }
 };
@@ -272,13 +270,12 @@ export const getWalletByUserId = async (userId: string): Promise<Wallet | null> 
     }
 };
 
-export const getTransactionsByUser = async (userId: string): Promise<Transaction[]> => {
-  if (!userId) return [];
+export const getTransactionsByUser = async (): Promise<Transaction[]> => {
   try {
-    const response = await apiGet<any[]>(`transacoes/usuario/${userId}`);
+    const response = await apiGet<any[]>(`transacoes/usuario`);
     return response.map(mapTransaction);
   } catch (e) {
-    console.error(`Failed to fetch transactions for user ${userId}:`, e);
+    console.error(`Failed to fetch transactions for user:`, e);
     throw new Error('Erro ao buscar transação: ' + (e as Error).message);
   }
 };
@@ -303,5 +300,3 @@ export const linkStudentToGuardian = async (studentCode: string): Promise<void> 
         throw error;
     }
 };
-
-

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Wallet, CreditCard, Loader2 } from 'lucide-react';
@@ -110,7 +109,7 @@ export default function StudentBalancePage() {
                 setIsLoading(true);
                 const [profile, transactions] = await Promise.all([
                     getStudentProfile(user.id),
-                    getTransactionsByUser(user.id)
+                    getTransactionsByUser()
                 ]);
                 setStudentProfile(profile);
                 setTransactionHistory(transactions);

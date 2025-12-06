@@ -174,8 +174,6 @@ export default function StudentOrdersPage() {
     const { user, isLoading: isUserLoading } = useAuth();
     const { addItem } = useCart();
 
-    const userId = user?.id ?? '';
-
     const [orderHistory, setOrderHistory] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [sortKey, setSortKey] = useState<SortKey>('date-desc');
@@ -183,10 +181,10 @@ export default function StudentOrdersPage() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            if (userId) {
+            if (user) {
                 setIsLoading(true);
                 try {
-                    const orders = await getOrdersByUser(userId);
+                    const orders = await getOrdersByUser();
                     setOrderHistory(orders);
                 } catch (error) {
                     console.error("Failed to fetch orders", error);
@@ -199,7 +197,7 @@ export default function StudentOrdersPage() {
         if (!isUserLoading && user) {
             fetchOrders();
         }
-    }, [userId, isUserLoading, toast, user]);
+    }, [isUserLoading, toast, user]);
 
     const filteredHistory = useMemo(() => {
         let processedOrders = [...orderHistory];
