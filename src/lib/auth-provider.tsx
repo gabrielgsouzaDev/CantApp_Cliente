@@ -101,17 +101,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const response = await apiPost<any>('login', {
       email,
-      password: password, // CRÍTICO: Alterado de 'senha' para 'password'
+      password: password,
       device_name: 'browser',
     });
     handleAuthSuccess(response);
   };
 
   const register = async (data: Record<string, any>) => {
-    const { password, ...rest } = data;
-    const payload = { ...rest, password: password }; // CRÍTICO: Alterado de 'senha' para 'password'
-    await apiPost('users', payload);
-    await login(data.email, password);
+    // CRÍTICO: Removida a lógica de renomear 'password' para 'senha'.
+    // O payload é enviado diretamente como o backend espera.
+    await apiPost('users', data);
+    await login(data.email, data.password);
   };
 
   const value = { user, token, isLoading, login, register, logout, refreshUser };
