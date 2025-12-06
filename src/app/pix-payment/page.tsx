@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -70,7 +69,7 @@ function PixPaymentContent() {
 
       // Atualiza os dados do usuário no frontend em segundo plano para refletir o novo saldo
       if (refreshUser) {
-        refreshUser();
+        await refreshUser();
       }
 
       // Redireciona após um breve delay para UX
