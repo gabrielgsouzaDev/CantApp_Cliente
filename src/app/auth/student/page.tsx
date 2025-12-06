@@ -112,10 +112,12 @@ export default function StudentAuthPage() {
 
     } catch (error: any) {
       console.error("Signup Error:", error);
+      // CRÍTICO: Pega a mensagem de erro específica do backend
+      const errorMessage = error.data?.errors?.email?.[0] || error.data?.message || error.message || 'Ocorreu um erro ao criar a conta.';
       toast({
         variant: 'destructive',
         title: 'Falha no cadastro',
-        description: error.data?.message || error.message || 'Ocorreu um erro ao criar a conta.',
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);

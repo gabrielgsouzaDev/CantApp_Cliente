@@ -73,8 +73,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []); // roda só uma vez
 
   const handleAuthSuccess = (response: any) => {
-    const apiUser = response.user;
-    const apiToken = response.token;
+    // CORREÇÃO: O backend agora retorna a estrutura dentro de um `data` aninhado
+    const apiResponse = response.data || response;
+    const apiUser = apiResponse.user;
+    const apiToken = apiResponse.token;
     
     const mappedUser = mapUser(apiUser);
     localStorage.setItem('authToken', apiToken);
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   const login = async (email: string, password: string) => {
+    // CRÍTICO: Alterado 'senha' para 'password' para corresponder ao novo AuthController
     const response = await apiPost<any>('login', {
       email,
       password: password,
@@ -108,7 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: Record<string, any>) => {
-    // CRÍTICO: Removida a lógica de renomear 'password' para 'senha'.
     // O payload é enviado diretamente como o backend espera.
     await apiPost('users', data);
     await login(data.email, data.password);
