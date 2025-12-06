@@ -165,7 +165,8 @@ export const getProductsByCanteen = async (canteenId: string): Promise<Product[]
 export const getFavoritesByUser = async (userId: string): Promise<Favorite[]> => {
   if (!userId) return [];
   try {
-    const response = await apiGet<any[]>(`favoritos/${userId}`);
+    // CORREÇÃO: A rota agora é `favoritos/usuario` e não precisa de ID
+    const response = await apiGet<any[]>(`favoritos/usuario`);
     return response.map(mapFavorite);
   } catch (e) {
     console.error(`Failed to fetch favorites for user ${userId}:`, e);
@@ -196,7 +197,8 @@ export const removeFavorite = async (userId: string, productId: string): Promise
 export const getOrdersByUser = async (userId: string): Promise<Order[]> => {
     if (!userId) return [];
     try {
-        const response = await apiGet<any[]>(`pedidos/usuario/${userId}`);
+        // CORREÇÃO: A rota agora é `pedidos/usuario` e não precisa de ID
+        const response = await apiGet<any[]>(`pedidos/usuario`);
         return response.map(mapOrder);
     } catch (e) {
         console.error(`Failed to fetch orders for user ${userId}:`, e);
@@ -275,7 +277,8 @@ export const getWalletByUserId = async (userId: string): Promise<Wallet | null> 
 export const getTransactionsByUser = async (userId: string): Promise<Transaction[]> => {
   if (!userId) return [];
   try {
-    const response = await apiGet<any[]>(`transacoes/usuario/${userId}`);
+    // CORREÇÃO: A rota agora é `transacoes/usuario` e não precisa de ID
+    const response = await apiGet<any[]>(`transacoes/usuario`);
     return response.map(mapTransaction);
   } catch (e) {
     console.error(`Failed to fetch transactions for user ${userId}:`, e);
@@ -303,3 +306,4 @@ export const linkStudentToGuardian = async (studentCode: string): Promise<void> 
         throw error;
     }
 };
+
