@@ -283,16 +283,13 @@ export const getTransactionsByUser = async (userId: string): Promise<Transaction
     }
 };
 
-export const rechargeBalance = async (userId: string, amount: number): Promise<Transaction> => {
+export const rechargeBalance = async (targetId: string, amount: number): Promise<Transaction> => {
     const payload = {
-        id_user: userId,
+        id_user: targetId,
         valor: amount
     };
-    const response = await apiPost<any>('carteiras/recarregar', payload); 
-    // A API agora deve retornar a transação criada, então mapeamos ela.
-    // Se a API retorna um objeto com 'data', usamos o que está dentro.
-    const transactionData = response.data || response;
-    return mapTransaction(transactionData);
+    const response = await apiPost<any>('carteiras/recarregar', payload);
+    return mapTransaction(response.transacao);
 }
 
 export const linkStudentToGuardian = async (studentCode: string): Promise<void> => {
