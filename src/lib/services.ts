@@ -105,7 +105,7 @@ const mapTransaction = (transaction: any): Transaction => ({
     date: transaction.created_at,
     description: transaction.descricao ?? 'Transação sem descrição',
     amount: parseFloat(transaction.valor ?? 0),
-    type: transaction.tipo === 'CREDITO' ? 'credit' : 'debit',
+    type: (['Recarregar', 'Estorno', 'CREDITO'].includes(transaction.tipo)) ? 'credit' : 'debit',
     origin: transaction.tipo ?? 'Compra',
     userId: transaction.id_user_autor?.toString() ?? '',
     status: transaction.status,
@@ -289,9 +289,16 @@ export const rechargeBalance = async (targetId: string, amount: number): Promise
         valor: amount
     };
     const response = await apiPost<any>('carteiras/recarregar', payload);
-    // CRÍTICO R29: O backend retorna um objeto { ..., transacao: { ... } }
-    // Acessamos o objeto aninhado 'transacao' para o mapeamento.
-    return mapTransaction(response.transacao);
+    
+    // CRÍTICO R29: Procura o objeto Transação na chave 'transacao' da resposta
+    const transactionData = response.transacao;
+
+    if (transactionData) {
+        return mapTransaction(transactionData);
+    }
+
+    // Se o backend não retornou, lança um erro para parar o fluxo do Front-end
+    throw new Error('Falha no contrato da API: Objeto de transação não retornado.');
 }
 
 export const linkStudentToGuardian = async (studentCode: string): Promise<void> => {
@@ -305,3 +312,4 @@ export const linkStudentToGuardian = async (studentCode: string): Promise<void> 
         throw error;
     }
 };
+
