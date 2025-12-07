@@ -1,4 +1,3 @@
-
 // src/lib/auth-provider.tsx
 'use client';
 
@@ -26,56 +25,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const logout = useCallback(async () => {
-    try {
-      await apiPost('logout', {});
-    } catch (error) {
-      console.error('Logout via API falhou, procedendo com logout local.', error);
-    } finally {
-      // Garante a limpeza completa e o redirecionamento
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userId');
-      setToken(null);
-      setUser(null);
-      // Força o redirecionamento para a página inicial para evitar estados inconsistentes
-      router.push('/'); 
-    }
+  const logout = useCallback(() => {
+    // Não é mais necessário chamar a API, pois o token é invalidado no lado do cliente
+    // e a segurança é garantida pela falta do token nas requisições subsequentes.
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    setToken(null);
+    setUser(null);
+    // Força o redirecionamento para a página inicial para evitar estados inconsistentes
+    router.push('/');
   }, [router]);
+
+
+  // Função para buscar e atualizar os dados do usuário do backend
+  const refreshUser = useCallback(async () => {
+    const storedUserId = localStorage.getItem('userId');
+    if (!storedUserId) {
+        // Se não há ID, não há usuário para atualizar, então fazemos logout para limpar o estado.
+        if (user) logout();
+        return;
+    }
+    try {
+        const updatedUserData = await getUser(storedUserId);
+        if (updatedUserData) {
+            setUser(updatedUserData);
+        } else {
+            // Se não encontrar o usuário (ex: foi deletado), força logout
+            logout();
+        }
+    } catch (error) {
+        console.error("Falha ao atualizar os dados do usuário, forçando logout:", error);
+        logout();
+    }
+  }, [user, logout]);
+
 
   useEffect(() => {
     let mounted = true;
     const initializeAuth = async () => {
+      setIsLoading(true);
       const storedToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-      const storedUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-
-      if (storedToken && storedUserId) {
+      
+      if (storedToken) {
         setToken(storedToken);
-
-        try {
-          const userData = await getUser(storedUserId);
-
-          if (!mounted) return;
-          if (!userData) {
-            console.error('Falha ao carregar dados do usuário, limpando sessão.');
-            await logout(); // Usa a função de logout centralizada
-            return;
-          }
-
-          setUser(userData);
-        } catch (error) {
-          console.error('Falha crítica ao inicializar autenticação, limpando sessão.', error);
-          await logout(); // Usa a função de logout centralizada
-        }
+        // Em vez de apenas pegar o ID, chamamos o refreshUser que já tem a lógica completa.
+        await refreshUser();
       }
-      if (mounted) setIsLoading(false);
+      
+      if (mounted) {
+        setIsLoading(false);
+      }
     };
 
     initializeAuth();
     return () => { mounted = false; };
-  }, [logout]); // Adiciona logout como dependência
+  }, [refreshUser]);
+
 
   const handleAuthSuccess = (response: any) => {
-    // CORREÇÃO: O backend agora retorna a estrutura dentro de um `data` aninhado
     const apiResponse = response.data || response;
     const apiUser = apiResponse.user;
     const apiToken = apiResponse.token;
@@ -86,24 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(apiToken);
     setUser(mappedUser);
   };
-  
-  const refreshUser = useCallback(async () => {
-    if (!user?.id) {
-        console.warn("Tentativa de atualizar usuário sem um usuário logado.");
-        return;
-    }
-    try {
-        const updatedUserData = await getUser(user.id);
-        if (updatedUserData) {
-            setUser(updatedUserData);
-        }
-    } catch (error) {
-        console.error("Falha ao atualizar os dados do usuário:", error);
-    }
-  }, [user?.id]);
 
   const login = async (email: string, password: string) => {
-    // CRÍTICO: Alterado 'senha' para 'password' para corresponder ao novo AuthController
     const response = await apiPost<any>('login', {
       email,
       password: password,
@@ -113,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: Record<string, any>) => {
-    // O payload é enviado diretamente como o backend espera.
     await apiPost('users', data);
     await login(data.email, data.password);
   };
