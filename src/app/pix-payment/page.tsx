@@ -13,6 +13,7 @@ import { QRCode } from '@/components/shared/qr-code';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth-provider';
 import { rechargeBalance } from '@/lib/services';
+import { type Transaction } from '@/lib/data';
 
 function PixPaymentContent() {
   const router = useRouter();
@@ -80,7 +81,7 @@ function PixPaymentContent() {
 
     } catch (error: any) {
       console.error("Payment confirmation error:", error);
-      toast({ variant: 'destructive', title: 'Erro na Confirmação', description: error.data?.message || 'Não foi possível concluir a operação.' });
+      toast({ variant: 'destructive', title: 'Erro na Confirmação', description: error.message || 'Não foi possível concluir a operação.' });
       setPaymentStatus('pending');
     }
   };
