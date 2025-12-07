@@ -52,7 +52,7 @@ import { type Order, type OrderItem } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { getOrdersByUser, updateOrderStatus, getProductsByCanteen } from '@/lib/services';
+import { getOrdersByUser, getProductsByCanteen, deleteOrder } from '@/lib/services';
 import { useAuth } from '@/lib/auth-provider';
 import { useCart } from '@/hooks/use-cart';
 
@@ -170,7 +170,7 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
 
 export default function StudentOrdersPage() {
     const { toast } = useToast();
-    const { user, isLoading: isUserLoading } = useAuth();
+    const { user, isLoading: isUserLoading, refreshUser } = useAuth();
     const { addItem } = useCart();
 
     const [orderHistory, setOrderHistory] = useState<Order[]>([]);
@@ -277,18 +277,24 @@ export default function StudentOrdersPage() {
 
     const handleCancelOrder = async (orderId: string) => {
         try {
-            const updatedOrder = await updateOrderStatus(orderId, 'cancelado');
-            setOrderHistory(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+            await deleteOrder(orderId);
+            // Atualiza a lista de pedidos, removendo o cancelado para feedback visual imediato.
+            // O ideal seria re-buscar a lista, mas isso é mais rápido para a UX.
+            setOrderHistory(prev => prev.filter(o => o.id !== orderId));
+            
+            // Atualiza o saldo do usuário
+            if(refreshUser) await refreshUser();
+
             toast({
                 title: "Pedido Cancelado",
                 description: "Seu pedido foi cancelado com sucesso e o valor estornado.",
                 variant: "success"
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to cancel order:", error);
             toast({
                 title: "Falha ao Cancelar",
-                description: "Não foi possível cancelar o pedido. Tente novamente.",
+                description: error.data?.message || "Não foi possível cancelar o pedido. Tente novamente.",
                 variant: "destructive"
             });
         }

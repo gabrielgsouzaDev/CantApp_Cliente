@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 import { type Order, type GuardianProfile, type User } from '@/lib/data';
 import { useAuth } from '@/lib/auth-provider';
-import { getGuardianProfile, updateOrderStatus, getOrdersByGuardian } from '@/lib/services';
+import { getGuardianProfile, deleteOrder, getOrdersByGuardian } from '@/lib/services';
 import { useToast } from '@/hooks/use-toast';
 
 import {
@@ -183,7 +183,7 @@ const OrderDetailsDialog = ({
 // DASHBOARD PRINCIPAL
 // ======================================================================
 export default function GuardianDashboardPage() {
-  const { user, isLoading: isUserLoading } = useAuth();
+  const { user, isLoading: isUserLoading, refreshUser } = useAuth();
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<GuardianProfile | null>(null);
@@ -237,17 +237,18 @@ export default function GuardianDashboardPage() {
   // ------------------------------------------------------------
   const handleCancelOrder = async (orderId: string) => {
     try {
-      const updatedOrder = await updateOrderStatus(orderId, 'cancelado');
-      setOrders(prev => prev.map(o => o.id === orderId ? updatedOrder : o));
+      await deleteOrder(orderId);
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      if(refreshUser) await refreshUser();
       toast({
         title: "Pedido Cancelado",
         description: "O pedido foi cancelado e o valor foi estornado.",
         variant: "success"
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erro ao cancelar",
-        description: "Tente novamente.",
+        description: error.data?.message || "Tente novamente.",
         variant: "destructive"
       });
     }

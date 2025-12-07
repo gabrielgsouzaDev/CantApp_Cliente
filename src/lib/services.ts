@@ -234,6 +234,11 @@ export const updateOrderStatus = async (orderId: string, status: string): Promis
   return mapOrder(response);
 };
 
+// Adicionada função para deletar/cancelar o pedido
+export const deleteOrder = async (orderId: string): Promise<void> => {
+  await apiDelete(`pedidos/${orderId}`);
+}
+
 export const getGuardianProfile = async (guardianId: string): Promise<GuardianProfile | null> => {
     if (!guardianId) return null;
     try {
