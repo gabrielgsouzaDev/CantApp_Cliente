@@ -69,17 +69,17 @@ export const CartSheet = () => {
 
     setIsCheckingOut(true);
     try {
-      // CRÍTICO: Monta o payload com snake_case para alinhar com o backend Laravel
+      // CRÍTICO R3/R13: Injeta o ID do usuário autenticado e garante snake_case
       const orderPayload = {
-        id_comprador: user.id,
-        id_destinatario: user.id,
+        id_comprador: user.id, // Injeção de segurança
+        id_destinatario: user.id, // Para o Aluno, ele é o comprador e o destinatário
         id_cantina: cartItems[0].product.canteenId,
         valor_total: totalPrice,
         status: 'pendente' as const,
         items: cartItems.map(item => ({
-          product_id: item.product.id, // snake_case
+          product_id: item.product.id,
           quantity: item.quantity,
-          unit_price: item.product.price, // snake_case
+          unit_price: item.product.price,
         })),
       };
 

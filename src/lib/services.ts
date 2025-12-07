@@ -19,7 +19,8 @@ export const mapUser = (user: any): User => ({
   id: user.id?.toString() ?? '',
   name: user.nome ?? user.name ?? 'Usuário',
   email: user.email ?? '',
-  role: user.roles?.[0]?.nome_role ?? 'Aluno',
+  // CRÍTICO R33: Garante que o role seja sempre minúsculo para consistência com a Policy
+  role: (user.roles?.[0]?.nome_role ?? 'Aluno').toLowerCase(), 
   balance: parseFloat(user.carteira?.saldo ?? 0),
   schoolId: user.id_escola?.toString() ?? null,
   canteenId: user.id_cantina?.toString() ?? null,
@@ -105,11 +106,13 @@ const mapTransaction = (transaction: any): Transaction => ({
     date: transaction.created_at,
     description: transaction.descricao ?? 'Transação sem descrição',
     amount: parseFloat(transaction.valor ?? 0),
+    // CRÍTICO R30: Mapear os tipos de ENUM do DB para o Front-end (credit/debit)
     type: (['Recarregar', 'Estorno', 'CREDITO'].includes(transaction.tipo)) ? 'credit' : 'debit',
     origin: transaction.tipo ?? 'Compra',
     userId: transaction.id_user_autor?.toString() ?? '',
     status: transaction.status,
 });
+
 
 const mapWallet = (wallet: any): Wallet => ({
     id: wallet.id_carteira?.toString() ?? '',
@@ -312,5 +315,3 @@ export const linkStudentToGuardian = async (studentCode: string): Promise<void> 
         throw error;
     }
 };
-
-
