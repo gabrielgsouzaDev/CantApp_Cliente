@@ -289,6 +289,8 @@ export const rechargeBalance = async (targetId: string, amount: number): Promise
         valor: amount
     };
     const response = await apiPost<any>('carteiras/recarregar', payload);
+    // CRÍTICO R29: O backend retorna um objeto { ..., transacao: { ... } }
+    // Acessamos o objeto aninhado 'transacao' para o mapeamento.
     return mapTransaction(response.transacao);
 }
 
