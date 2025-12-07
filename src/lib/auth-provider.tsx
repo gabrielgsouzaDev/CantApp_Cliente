@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUserId = localStorage.getItem('userId');
     if (!storedUserId) {
         // Se não há ID, não há usuário para atualizar, então fazemos logout para limpar o estado.
-        if (user) logout();
+        logout();
         return;
     }
     try {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Falha ao atualizar os dados do usuário, forçando logout:", error);
         logout();
     }
-  }, [user, logout]);
+  }, [logout]);
 
 
   useEffect(() => {
