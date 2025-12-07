@@ -18,8 +18,9 @@ import { apiGet, apiPost, apiDelete, apiPatch } from './api';
 export const mapUser = (user: any): User => ({
   id: user.id?.toString() ?? '',
   name: user.nome ?? user.name ?? 'Usuário',
-  // CRÍTICO R33: Garante que o role seja sempre minúsculo para consistência com a Policy
-  role: (user.roles?.[0]?.nome_role ?? user.role ?? 'Aluno').toLowerCase(), 
+  email: user.email ?? '', // CORREÇÃO R34: Campo 'email' adicionado
+  // CRÍTICO R33: Garantir consistência de case para a PedidoPolicy
+  role: (user.roles?.[0]?.nome_role ?? user.role ?? 'aluno').toLowerCase(),
   balance: parseFloat(user.carteira?.saldo ?? 0),
   schoolId: user.id_escola?.toString() ?? null,
   canteenId: user.id_cantina?.toString() ?? null,
