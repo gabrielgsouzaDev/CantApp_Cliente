@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from "react";
@@ -62,7 +61,12 @@ export const CartSheet = () => {
       return;
     }
 
-    if (user.balance < totalPrice) {
+    // CRÍTICO R36: Comparação segura para evitar erros de ponto flutuante
+    // Multiplicamos por 100 para trabalhar com centavos (inteiros)
+    const userBalanceInCents = Math.round(user.balance * 100);
+    const totalPriceInCents = Math.round(totalPrice * 100);
+
+    if (userBalanceInCents < totalPriceInCents) {
       toast({ variant: 'destructive', title: 'Saldo insuficiente', description: 'Por favor, recarregue sua carteira para continuar.' });
       return;
     }

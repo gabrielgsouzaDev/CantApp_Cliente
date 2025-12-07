@@ -75,7 +75,8 @@ function PixPaymentContent() {
 
       // Redireciona após um breve delay para UX
       setTimeout(() => {
-        const redirectPath = user?.role === 'Aluno' ? '/student/balance' : '/guardian/recharge';
+        // CRÍTICO R35: Corrigido para comparar com 'aluno' minúsculo
+        const redirectPath = user?.role === 'aluno' ? '/student/balance' : '/guardian/recharge';
         window.location.href = redirectPath;
       }, 1500);
 
