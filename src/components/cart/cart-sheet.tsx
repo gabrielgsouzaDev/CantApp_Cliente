@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -73,10 +74,10 @@ export const CartSheet = () => {
 
     setIsCheckingOut(true);
     try {
-      // CRÍTICO R3/R13: Injeta o ID do usuário autenticado e garante snake_case
+      // CRÍTICO R3: Injeta o ID do usuário autenticado e garante snake_case
       const orderPayload = {
-        id_comprador: user.id, // Injeção de segurança
-        id_destinatario: user.id, // Para o Aluno, ele é o comprador e o destinatário
+        id_comprador: user.id,
+        id_destinatario: user.id,
         id_cantina: cartItems[0].product.canteenId,
         valor_total: totalPrice,
         status: 'pendente' as const,

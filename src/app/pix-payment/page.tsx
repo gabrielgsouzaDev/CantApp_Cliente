@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -62,11 +63,11 @@ function PixPaymentContent() {
 
     try {
       // AGUARDA a resposta do backend
-      await rechargeBalance(targetId, Number(amount));
+      const transaction = await rechargeBalance(targetId, Number(amount));
 
       // UI é atualizada apenas após o sucesso
       setPaymentStatus('confirmed');
-      toast({ variant: 'success', title: 'Pagamento Processado!', description: 'Seu saldo foi atualizado com sucesso.' });
+      toast({ variant: 'success', title: 'Pagamento Processado!', description: `A transação #${transaction.id.substring(0, 6)} foi concluída.` });
 
       // Atualiza os dados do usuário no frontend em segundo plano para refletir o novo saldo
       if (refreshUser) {
