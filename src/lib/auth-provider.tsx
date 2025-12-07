@@ -26,18 +26,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await apiPost('logout', {});
     } catch (error) {
       console.error('Logout via API falhou, procedendo com logout local.', error);
     } finally {
-      localStorage.clear();
+      // Garante a limpeza completa e o redirecionamento
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userId');
       setToken(null);
       setUser(null);
-      router.push('/');
+      // Força o redirecionamento para a página inicial para evitar estados inconsistentes
+      router.push('/'); 
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     let mounted = true;
@@ -54,14 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (!mounted) return;
           if (!userData) {
             console.error('Falha ao carregar dados do usuário, limpando sessão.');
-            logout();
+            await logout(); // Usa a função de logout centralizada
             return;
           }
 
           setUser(userData);
         } catch (error) {
           console.error('Falha crítica ao inicializar autenticação, limpando sessão.', error);
-          logout();
+          await logout(); // Usa a função de logout centralizada
         }
       }
       if (mounted) setIsLoading(false);
@@ -69,8 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initializeAuth();
     return () => { mounted = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // roda só uma vez
+  }, [logout]); // Adiciona logout como dependência
 
   const handleAuthSuccess = (response: any) => {
     // CORREÇÃO: O backend agora retorna a estrutura dentro de um `data` aninhado
