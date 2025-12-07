@@ -48,8 +48,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
-import { type Order, type Product, type OrderItem } from '@/lib/data';
+import { type Order, type OrderItem } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -138,7 +137,7 @@ const OrderDetailsDialog = ({ order, onRepeatOrder, onCancelOrder }: { order: Or
                 <DialogClose asChild>
                     <Button variant="outline" className="w-full sm:w-auto">Fechar</Button>
                 </DialogClose>
-                <div className="flex flex-col-reverse sm:gap-2 w-full sm:w-auto">
+                <div className="flex flex-col-reverse gap-2 sm:flex-row w-full sm:w-auto">
                     {order.status === 'pendente' && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -479,3 +478,5 @@ export default function StudentOrdersPage() {
     );
 }
 
+
+    

@@ -18,8 +18,7 @@ import { apiGet, apiPost, apiDelete, apiPatch } from './api';
 export const mapUser = (user: any): User => ({
   id: user.id?.toString() ?? '',
   name: user.nome ?? user.name ?? 'Usuário',
-  email: user.email ?? '', // CORREÇÃO R34: Campo 'email' adicionado
-  // CRÍTICO R33: Garantir consistência de case para a PedidoPolicy
+  email: user.email ?? '',
   role: (user.roles?.[0]?.nome_role ?? user.role ?? 'aluno').toLowerCase(),
   balance: parseFloat(user.carteira?.saldo ?? 0),
   schoolId: user.id_escola?.toString() ?? null,
@@ -106,7 +105,6 @@ const mapTransaction = (transaction: any): Transaction => ({
     date: transaction.created_at,
     description: transaction.descricao ?? 'Transação sem descrição',
     amount: parseFloat(transaction.valor ?? 0),
-    // CRÍTICO R30: Mapear os tipos de ENUM do DB para o Front-end (credit/debit)
     type: (['Recarregar', 'Estorno', 'CREDITO'].includes(transaction.tipo)) ? 'credit' : 'debit',
     origin: transaction.tipo ?? 'Compra',
     userId: transaction.id_user_autor?.toString() ?? '',
@@ -207,6 +205,17 @@ export const getOrdersByUser = async (userId: string): Promise<Order[]> => {
     }
 };
 
+export const getOrdersByGuardian = async (guardianId: string): Promise<Order[]> => {
+    if (!guardianId) return [];
+    try {
+        const response = await apiGet<any[]>(`pedidos/responsavel/${guardianId}`);
+        return response.map(mapOrder);
+    } catch (e) {
+        console.error(`Failed to fetch orders for guardian ${guardianId}:`, e);
+        return [];
+    }
+};
+
 export const postOrder = async (orderData: {
   id_comprador: string;
   id_destinatario: string;
@@ -293,14 +302,12 @@ export const rechargeBalance = async (targetId: string, amount: number): Promise
     };
     const response = await apiPost<any>('carteiras/recarregar', payload);
     
-    // CRÍTICO R29: Procura o objeto Transação na chave 'transacao' da resposta
     const transactionData = response.transacao;
 
     if (transactionData) {
         return mapTransaction(transactionData);
     }
 
-    // Se o backend não retornou, lança um erro para parar o fluxo do Front-end
     throw new Error('Falha no contrato da API: Objeto de transação não retornado.');
 }
 
@@ -315,3 +322,5 @@ export const linkStudentToGuardian = async (studentCode: string): Promise<void> 
         throw error;
     }
 };
+
+    

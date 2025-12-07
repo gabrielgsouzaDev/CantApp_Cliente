@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 import { type Order, type GuardianProfile, type User } from '@/lib/data';
 import { useAuth } from '@/lib/auth-provider';
-import { getGuardianProfile, updateOrderStatus } from '@/lib/services';
+import { getGuardianProfile, updateOrderStatus, getOrdersByGuardian } from '@/lib/services';
 import { useToast } from '@/hooks/use-toast';
 
 import {
@@ -192,7 +192,7 @@ export default function GuardianDashboardPage() {
 
 
   // ------------------------------------------------------------
-  // CARREGAR PERFIL DO RESPONSÁVEL (sem pedidos por enquanto)
+  // CARREGAR PERFIL E PEDIDOS DO RESPONSÁVEL
   // ------------------------------------------------------------
   useEffect(() => {
     const fetchData = async () => {
@@ -200,11 +200,13 @@ export default function GuardianDashboardPage() {
 
       setIsLoading(true);
       try {
-        const guardianProfile = await getGuardianProfile(user.id);
-        setProfile(guardianProfile);
+        const [guardianProfile, guardianOrders] = await Promise.all([
+          getGuardianProfile(user.id),
+          getOrdersByGuardian(user.id)
+        ]);
 
-        // 🔥 SEM getOrdersByGuardian → histórico vazio por enquanto
-        setOrders([]);
+        setProfile(guardianProfile);
+        setOrders(guardianOrders);
       } catch (error) {
         console.error("Failed to fetch guardian data:", error);
         toast({
@@ -225,8 +227,7 @@ export default function GuardianDashboardPage() {
   // MAP DE ALUNOS
   // ------------------------------------------------------------
   const studentsMap = useMemo(() => {
-    // const map = new Map<string, User>(); ❌ errado
-    const map = new Map<string, any>(); // ✅ resolve
+    const map = new Map<string, any>();
     profile?.students.forEach(student => map.set(student.id, student));
     return map;
 }, [profile]);
@@ -309,21 +310,60 @@ export default function GuardianDashboardPage() {
         )}
       </div>
 
-      {/* HISTÓRICO – VAZIO POR ENQUANTO */}
+      {/* HISTÓRICO */}
       <Card>
         <CardHeader>
           <CardTitle>Histórico de Pedidos dos Dependentes</CardTitle>
           <CardDescription>
-            Assim que implementarmos a rota oficial de pedidos, tudo aparecerá aqui.
+            Acompanhe os últimos pedidos feitos pelos seus dependentes.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <div className="text-center text-muted-foreground py-10">
-            Nenhum pedido encontrado.
-          </div>
+          {orders.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Aluno</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map(order => {
+                  const student = studentsMap.get(order.id_destinatario);
+                  const studentName = student?.name ?? 'Desconhecido';
+                  
+                  return (
+                    <Dialog key={order.id}>
+                      <DialogTrigger asChild>
+                        <TableRow className="cursor-pointer">
+                          <TableCell className="font-medium">{studentName}</TableCell>
+                          <TableCell>{new Date(order.date).toLocaleDateString('pt-BR')}</TableCell>
+                          <TableCell><OrderStatusBadge status={order.status} /></TableCell>
+                          <TableCell className="text-right">R$ {order.total.toFixed(2)}</TableCell>
+                        </TableRow>
+                      </DialogTrigger>
+                      <OrderDetailsDialog 
+                        order={order}
+                        studentName={studentName}
+                        onCancelOrder={handleCancelOrder}
+                      />
+                    </Dialog>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center text-muted-foreground py-10">
+              Nenhum pedido encontrado.
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
+    
