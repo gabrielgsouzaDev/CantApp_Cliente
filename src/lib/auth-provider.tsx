@@ -38,20 +38,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Função para buscar e atualizar os dados do usuário do backend
   const refreshUser = useCallback(async () => {
     const storedUserId = localStorage.getItem('userId');
-    if (!storedUserId) {
-        // Se não há ID, não há usuário para atualizar, então fazemos logout para limpar o estado.
+    const storedToken = localStorage.getItem('authToken'); // Buscar token para checagem extra
+
+    if (!storedUserId || !storedToken) { // Verifica se ambos existem
+        // Se não há ID ou Token, força logout para limpar estado
         logout();
         return;
     }
     try {
-        const updatedUserData = await getUser(storedUserId);
+        const updatedUserData = await getUser(storedUserId); // Tenta buscar o usuário
         if (updatedUserData) {
             setUser(updatedUserData);
         } else {
-            // Se não encontrar o usuário (ex: foi deletado), força logout
-            logout();
+            // Se o backend não retornar o usuário (token inválido/usuário deletado), limpa.
+            logout(); 
         }
     } catch (error) {
+        // Qualquer erro de rede ou 401/403 no getUser
         console.error("Falha ao atualizar os dados do usuário, forçando logout:", error);
         logout();
     }
