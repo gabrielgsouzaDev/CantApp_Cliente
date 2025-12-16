@@ -17,7 +17,7 @@ import { apiGet, apiPost, apiDelete, apiPatch } from './api';
 
 export const mapUser = (user: any): User => ({
   id: user.id?.toString() ?? '',
-  name: user.nome ?? user.name ?? 'Usuário',
+  name: user.nome_completo ?? user.nome ?? user.name ?? 'Usuário',
   email: user.email ?? '',
   role: (user.roles?.[0]?.nome_role ?? user.role ?? 'aluno').toLowerCase(),
   balance: parseFloat(user.carteira?.saldo ?? 0),
@@ -25,7 +25,7 @@ export const mapUser = (user: any): User => ({
   canteenId: user.id_cantina?.toString() ?? null,
   students: (user.dependentes || []).map((s: any): StudentLite => ({
     id: s.id.toString(),
-    name: s.nome,
+    name: s.nome_completo ?? s.nome,
     balance: parseFloat(s.carteira?.saldo ?? 0),
     walletId: s.carteira?.id_carteira?.toString() || null,
     school: s.escola ? { name: s.escola.nome } : null,
