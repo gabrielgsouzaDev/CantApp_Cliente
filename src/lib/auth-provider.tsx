@@ -1,3 +1,4 @@
+
 // src/lib/auth-provider.tsx
 'use client';
 
@@ -26,13 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const logout = useCallback(() => {
-    // Não é mais necessário chamar a API, pois o token é invalidado no lado do cliente
-    // e a segurança é garantida pela falta do token nas requisições subsequentes.
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
+    // CRÍTICO R53: Limpa TODO o localStorage para evitar vazamento de sessão (carrinho, favoritos, etc.)
+    localStorage.clear();
     setToken(null);
     setUser(null);
-    // Força o redirecionamento para a página inicial para evitar estados inconsistentes
     router.push('/');
   }, [router]);
 
@@ -83,6 +81,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   const handleAuthSuccess = (response: any) => {
+    // CRÍTICO R53: Limpa o localStorage de sessões anteriores ANTES de definir novos dados.
+    localStorage.clear();
+
     const apiResponse = response.data || response;
     const apiUser = apiResponse.user;
     const apiToken = apiResponse.token;
